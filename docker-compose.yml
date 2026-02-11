@@ -1,54 +1,47 @@
 version: "3.9"
 
 services:
-  budget-control:
-    container_name: "${NAME}"
-    image: "${DOCKER_COMPOSE_IMAGE_NAME}"
-    tty: true
-    command: ["sh", "./deployment.sh"]
-    restart: always
-    env_file:
-      - .env
+  redis:
+    image: redis:alpine
+    container_name: redis
     ports:
-      - "${DOCKER_PORT}:${PORT}"
-    environment:
-      DATABASE_HOST: "${DATABASE_HOST}"
-      DATABASE_PORT: "${DATABASE_PORT}"
-      DATABASE_NAME: "${DATABASE_NAME}"
-      DATABASE_USER: "${DATABASE_USER}"
-      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
+      - "6379:6379"
+    restart: unless-stopped
     healthcheck:
-      test: curl --fail http://localhost:${PORT}/api/v1 || exit 1
-      interval: 10s
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
       timeout: 3s
-      retries: 5
-      start_period: 10s
-    networks:
-      - default
+      retries: 3
 
-  budget-control-worker:
-    container_name: "${WORKER_NAME}"
-    image: "${DOCKER_COMPOSE_IMAGE_NAME}"
-    tty: true
+  collab-app-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: collab-app-1
+    ports:
+      - "3001:3000"
     env_file:
       - .env
     depends_on:
-      budget-control:
+      redis:
         condition: service_healthy
-    command: ["node", "dist/worker.js"]
-    environment:
-      DATABASE_HOST: "${DATABASE_HOST}"
-      DATABASE_PORT: "${DATABASE_PORT}"
-      DATABASE_NAME: "${DATABASE_NAME}"
-      DATABASE_USER: "${DATABASE_USER}"
-      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
-    ports:
-      - "${WORKER_PORT}:${WORKER_PORT}"
+    restart: unless-stopped
 
-    networks:
-      - default
+  collab-app-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: collab-app-2
+    ports:
+      - "3002:3000"
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 
 networks:
   default:
-    name: "budget-control-dev"
+    name: collab-net
     driver: bridge
