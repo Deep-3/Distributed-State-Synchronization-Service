@@ -1,0 +1,6 @@
+pnpm lint-staged
+
+pnpm type-check || {
+  echo "TypeScript type checking failed. Aborting push."
+  exit 1
+}
