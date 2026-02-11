@@ -75,3 +75,24 @@ Easiest way to test WebSocket is the built-in HTML page:
 ```text
 http://localhost:3000/api/v1/collab/test
 ```
+
+### Multiple instances (2 terminals)
+
+If you want to run multiple backend instances locally:
+
+1. Open a **second terminal**
+
+2. In `.env`, change `PORT` and `INSTANCE_ID` for the second instance (example):
+
+```text
+PORT=3001
+INSTANCE_ID=instance-b
+```
+
+3. Run in the second terminal:
+
+```bash
+pnpm start
+```
+
+Both instances should point to the **same Redis** (`REDIS_HOST`, `REDIS_PORT`) so updates can sync across instances.
