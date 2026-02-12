@@ -129,6 +129,7 @@ export class CollaborationController {
       const setLastChange = (senderId, ts) => {
         const who = senderId || "unknown";
         const when = ts ? formatTs(ts) : formatTs(Date.now());
+        if (!lastChangeEl) return;
         lastChangeEl.textContent = who + " @ " + when + " | " + jsonPreview();
       };
 
