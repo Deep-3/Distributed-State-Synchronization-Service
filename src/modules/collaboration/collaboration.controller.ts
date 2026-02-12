@@ -281,6 +281,7 @@ export class CollaborationController {
           try {
             parsed = editor.value.trim() ? JSON.parse(editor.value) : {};
           } catch (e) {
+            setJsonError("Invalid JSON: " + (e && e.message ? e.message : "parse error"));
             return;
           }
 
